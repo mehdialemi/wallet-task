@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -54,4 +55,26 @@ public class WalletService {
         return walletRepository.save(wallet);
     }
 
+    @Transactional
+    public void transfer(String fromOwner, String toOwner, BigDecimal amount)
+            throws WalletNotFoundException, InsufficientBalanceException {
+        Wallet sender = getWallet(fromOwner);
+        Wallet receiver = getWallet(toOwner);
+
+        if (sender.getBalance().compareTo(amount) < 0) {
+            throw new InsufficientBalanceException("Insufficient funds to transfer");
+        }
+
+        sender.setBalance(sender.getBalance().subtract(amount));
+        receiver.setBalance(receiver.getBalance().add(amount));
+        transactionRepository.save(new WalletTransaction(fromOwner, "TRANSFER", amount.negate(), "Transfer to " + toOwner));
+        transactionRepository.save(new WalletTransaction(toOwner, "TRANSFER", amount, "Received from " + fromOwner));
+
+        walletRepository.save(sender);
+        walletRepository.save(receiver);
+    }
+
+    public List<WalletTransaction> getTransactionHistory(String owner) {
+        return transactionRepository.findByOwner(owner);
+    }
 }
