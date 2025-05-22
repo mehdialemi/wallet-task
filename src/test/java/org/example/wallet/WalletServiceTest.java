@@ -16,11 +16,8 @@ import org.mockito.MockitoAnnotations;
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 public class WalletServiceTest {
 
@@ -43,6 +40,7 @@ public class WalletServiceTest {
         wallet.setOwner("mehdi");
         wallet.setBalance(BigDecimal.valueOf(100));
         when(walletRepository.findByOwner("mehdi")).thenReturn(Optional.of(wallet));
+        when(walletRepository.save(wallet)).thenReturn(wallet);
     }
 
     @Test
@@ -76,5 +74,40 @@ public class WalletServiceTest {
                 });
 
         assertEquals("Insufficient Balance", exception.getMessage());
+    }
+
+    @Test
+    public void testTransferFunds_Success() throws WalletNotFoundException, InsufficientBalanceException {
+        Wallet targetWallet = new Wallet();
+        targetWallet.setId(2L);
+        targetWallet.setOwner("saeed");
+        targetWallet.setBalance(BigDecimal.valueOf(50));
+
+        when(walletRepository.findByOwner("saeed")).thenReturn(Optional.of(targetWallet));
+
+        walletService.transfer("mehdi", "saeed", BigDecimal.valueOf(30));
+
+        assertEquals(BigDecimal.valueOf(70), walletService.getWallet("mehdi").getBalance());
+        assertEquals(BigDecimal.valueOf(80), walletService.getWallet("saeed").getBalance());
+
+        verify(transactionRepository, times(2)).save(any(WalletTransaction.class));
+        verify(walletRepository).save(wallet);
+        verify(walletRepository).save(targetWallet);
+    }
+
+    @Test
+    public void testTransferFunds_InsufficientBalance() {
+        Wallet targetWallet = new Wallet();
+        targetWallet.setId(2L);
+        targetWallet.setOwner("saeed");
+        targetWallet.setBalance(BigDecimal.valueOf(50));
+
+        when(walletRepository.findByOwner("saeed")).thenReturn(Optional.of(targetWallet));
+
+        InsufficientBalanceException exception = assertThrows(InsufficientBalanceException.class, () -> {
+            walletService.transfer("mehdi", "saeed", BigDecimal.valueOf(200));
+        });
+
+        assertEquals("Insufficient funds to transfer", exception.getMessage());
     }
 }
