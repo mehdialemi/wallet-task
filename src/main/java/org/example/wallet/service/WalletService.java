@@ -30,6 +30,11 @@ public class WalletService {
         );
     }
 
+    public BigDecimal getBalance(String owner) throws WalletNotFoundException {
+        Wallet wallet = getWallet(owner);
+        return wallet.getBalance();
+    }
+
     public Wallet createWallet(String owner) {
         Wallet wallet = new Wallet();
         wallet.setOwner(owner);
