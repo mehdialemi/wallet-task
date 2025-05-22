@@ -1,0 +1,12 @@
+server:
+  port: 8080
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/taskdb
+    username: root
+    password: secret
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+

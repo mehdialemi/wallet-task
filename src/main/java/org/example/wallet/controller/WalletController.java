@@ -1,17 +1,19 @@
 package org.example.wallet.controller;
 
+import org.example.wallet.exception.InsufficientBalanceException;
 import org.example.wallet.exception.WalletNotFoundException;
+import org.example.wallet.model.WalletTransaction;
+import org.example.wallet.payload.TransferRequest;
 import org.example.wallet.service.WalletService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/wallet")
@@ -26,9 +28,24 @@ public class WalletController {
                 .getAuthentication();
         return authentication.getName();
     }
+
+    @PreAuthorize("hasRole('USER')")
     @GetMapping("/balance")
-    private ResponseEntity<BigDecimal> balance(@RequestParam String owner) throws WalletNotFoundException {
+    public BigDecimal balance(@RequestParam String owner) throws WalletNotFoundException {
         BigDecimal balance = service.getBalance(owner);
-        return ResponseEntity.ok(balance);
+        return balance;
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/transfer")
+    public String transfer(@RequestParam String to, @RequestParam BigDecimal amount) throws WalletNotFoundException, InsufficientBalanceException {
+        service.transfer(getCurrentUsername(), to, amount);
+        return "Transfer successful";
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/history")
+    public List<WalletTransaction> transactionHistory() {
+        return service.getTransactionHistory(getCurrentUsername());
     }
 }
