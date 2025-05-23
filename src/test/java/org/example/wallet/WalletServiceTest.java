@@ -4,6 +4,7 @@ import org.example.wallet.exception.InsufficientBalanceException;
 import org.example.wallet.exception.WalletNotFoundException;
 import org.example.wallet.model.Wallet;
 import org.example.wallet.model.WalletTransaction;
+import org.example.wallet.repository.AuditLogRepository;
 import org.example.wallet.repository.WalletRepository;
 import org.example.wallet.repository.WalletTransactionRepository;
 import org.example.wallet.service.WalletService;
@@ -23,6 +24,9 @@ public class WalletServiceTest {
 
     @Mock
     private WalletRepository walletRepository;
+
+    @Mock
+    private AuditLogRepository auditLogRepository;
 
     @Mock
     private WalletTransactionRepository transactionRepository;
