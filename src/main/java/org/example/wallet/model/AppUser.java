@@ -27,6 +27,8 @@ public class AppUser implements UserDetails {
     @Column(nullable = false)
     private String password;
 
+    private String fullName;
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
