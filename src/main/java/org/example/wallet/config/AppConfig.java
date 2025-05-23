@@ -1,6 +1,5 @@
 package org.example.wallet.config;
 
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.example.wallet.repository.AppUserRepository;
 import org.springframework.context.annotation.Bean;
@@ -30,6 +29,7 @@ public class AppConfig {
         return new BCryptPasswordEncoder();
     }
 
+    @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
             throws Exception {
         return config.getAuthenticationManager();

@@ -20,7 +20,7 @@ public class AuthenticationService {
     public AppUser signup(RegisterUserRequest request) {
         AppUser user = new AppUser();
         user.setUsername(request.getUsername());
-        user.setPassword(request.getPassword());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setFullName(request.getFullName());
 
         return userRepository.save(user);

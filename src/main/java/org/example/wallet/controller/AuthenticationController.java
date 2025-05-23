@@ -13,19 +13,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("auth")
 @RequiredArgsConstructor
 public class AuthenticationController{
 
     private final JwtService jwtService;
     private final AuthenticationService authenticationService;
 
-    @PostMapping("/signup")
+    @PostMapping("signup")
     public AppUser register(@RequestBody RegisterUserRequest request) {
         return authenticationService.signup(request);
     }
 
-    @PostMapping("/login")
+    @PostMapping("login")
     public LoginResponse authenticate(@RequestBody LoginUserRequest request) {
         AppUser user = authenticationService.authenticate(request);
         String jwtToken = jwtService.generateToken(user);
