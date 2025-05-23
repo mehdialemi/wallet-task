@@ -1,12 +1,11 @@
 package org.example.wallet.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.example.wallet.dto.AddFundRequest;
 import org.example.wallet.dto.TransferRequest;
+import org.example.wallet.dto.WithdrawFundRequest;
 import org.example.wallet.exception.InsufficientBalanceException;
 import org.example.wallet.exception.WalletNotFoundException;
 import org.example.wallet.model.Wallet;
@@ -42,19 +41,27 @@ public class WalletController {
         return service.getBalance(getCurrentUsername());
     }
 
+    @Operation(summary = "Withdraw from wallet")
+    @PreAuthorize("hasRole('USER')")
+    @PostMapping("withdraw")
+    public Wallet withdraw(@RequestBody WithdrawFundRequest request)
+            throws WalletNotFoundException, InsufficientBalanceException {
+        return service.withdrawFunds(getCurrentUsername(), request.getAmount());
+    }
+
     @Operation(summary = "Add funds to wallet",
             description = "Simply add the provided value to the current user wallet ")
     @PreAuthorize("hasRole('USER')")
-    @PostMapping("addFund")
-    public Wallet addFunds(@RequestBody AddFundRequest request)
+    @PostMapping("deposit")
+    public Wallet deposit(@RequestBody AddFundRequest request)
             throws WalletNotFoundException {
-        return service.addFunds(getCurrentUsername(), request.getAmount());
+        return service.deposit(getCurrentUsername(), request.getAmount());
     }
 
     @Operation(summary = "Transfer money between wallet",
             description = "Transfer money from the current user to the provided account username according to the given request")
     @PreAuthorize("hasRole('USER')")
-    @GetMapping("transfer")
+    @PostMapping("transfer")
     public String transfer(@RequestBody TransferRequest request) throws WalletNotFoundException, InsufficientBalanceException {
         service.transfer(getCurrentUsername(), request.getToUser(), request.getAmount());
         return "Transfer successful";

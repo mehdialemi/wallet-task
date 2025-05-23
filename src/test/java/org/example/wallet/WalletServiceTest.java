@@ -46,7 +46,7 @@ public class WalletServiceTest {
     @Test
     public void testAddFunds() throws WalletNotFoundException {
         BigDecimal amount = BigDecimal.valueOf(50);
-        Wallet updatedWallet = walletService.addFunds("mehdi", amount);
+        Wallet updatedWallet = walletService.deposit("mehdi", amount);
 
         assertEquals(BigDecimal.valueOf(150), updatedWallet.getBalance());
         verify(transactionRepository).save(any(WalletTransaction.class));

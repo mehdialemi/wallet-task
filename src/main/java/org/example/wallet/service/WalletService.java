@@ -1,28 +1,33 @@
 package org.example.wallet.service;
 
-import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.wallet.exception.InsufficientBalanceException;
 import org.example.wallet.exception.WalletNotFoundException;
+import org.example.wallet.model.AuditLog;
 import org.example.wallet.model.Wallet;
 import org.example.wallet.model.WalletTransaction;
+import org.example.wallet.repository.AuditLogRepository;
 import org.example.wallet.repository.WalletRepository;
 import org.example.wallet.repository.WalletTransactionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class WalletService {
 
-    @Autowired
-    private WalletRepository walletRepository;
+    private final WalletRepository walletRepository;
 
-    @Autowired
-    private WalletTransactionRepository transactionRepository;
+    private final WalletTransactionRepository transactionRepository;
+
+    private final AuditLogRepository auditLogRepository;
 
     public Wallet getWallet(String owner) throws WalletNotFoundException {
         return walletRepository.findByOwner(owner).orElseThrow(
@@ -41,18 +46,22 @@ public class WalletService {
         return walletRepository.save(wallet);
     }
 
-    @Transactional
-    public Wallet addFunds(String owner, BigDecimal amount) throws WalletNotFoundException {
+    @Transactional(rollbackFor = WalletNotFoundException.class,
+            propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED)
+    public Wallet deposit(String owner, BigDecimal amount) throws WalletNotFoundException {
         Wallet wallet = getWallet(owner);
         wallet.setBalance(wallet.getBalance().add(amount));
         transactionRepository.save(new WalletTransaction(owner, "ADD", amount, "Add founds"));
         return walletRepository.save(wallet);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = {InsufficientBalanceException.class},
+            propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED)
     public Wallet withdrawFunds(String owner, BigDecimal amount) throws WalletNotFoundException, InsufficientBalanceException {
         Wallet wallet = getWallet(owner);
         if (wallet.getBalance().compareTo(amount) < 0) {
+            logFailedTransaction(owner, "WITHDRAW", amount,
+                    "Withdrawal failed: Insufficient balance");
             throw new InsufficientBalanceException("Insufficient Balance");
         }
         wallet.setBalance(wallet.getBalance().subtract(amount));
@@ -60,13 +69,16 @@ public class WalletService {
         return walletRepository.save(wallet);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = {InsufficientBalanceException.class},
+            propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED)
     public void transfer(String fromOwner, String toOwner, BigDecimal amount)
             throws WalletNotFoundException, InsufficientBalanceException {
         Wallet sender = getWallet(fromOwner);
         Wallet receiver = getWallet(toOwner);
 
         if (sender.getBalance().compareTo(amount) < 0) {
+            logFailedTransaction(fromOwner, "TRANSFER", amount,
+                    "Transfer failed: Insufficient funds to transfer to " + toOwner);
             throw new InsufficientBalanceException("Insufficient funds to transfer");
         }
 
@@ -81,5 +93,13 @@ public class WalletService {
 
     public List<WalletTransaction> getTransactionHistory(String owner) {
         return transactionRepository.findByOwner(owner);
+    }
+
+    @Transactional(propagation = Propagation.NESTED)
+    public void logFailedTransaction(String owner, String type, BigDecimal amount, String reason) {
+        log.warn("Logging failed transaction for {}: {} {} - {}", owner, type, amount, reason);
+        WalletTransaction failedTx = new WalletTransaction(owner, type, amount, reason);
+        transactionRepository.save(failedTx);
+        auditLogRepository.save(new AuditLog(owner, type, amount, reason));
     }
 }
