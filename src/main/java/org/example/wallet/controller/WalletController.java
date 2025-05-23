@@ -11,6 +11,7 @@ import org.example.wallet.exception.WalletNotFoundException;
 import org.example.wallet.model.Wallet;
 import org.example.wallet.model.WalletTransaction;
 import org.example.wallet.service.WalletService;
+import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -67,12 +68,22 @@ public class WalletController {
         return "Transfer successful";
     }
 
-    @Operation(summary = "Transaction history",
-            description = "Get the list of transaction for the wallet of the current user")
+    @Operation(summary = "All transaction history",
+            description = "Get list all of transactions for the wallet of the current user")
     @PreAuthorize("hasRole('USER')")
     @GetMapping("history")
     public List<WalletTransaction> transactionHistory() {
         return service.getTransactionHistory(getCurrentUsername());
+    }
+
+    @Operation(summary = "Pageable transaction history",
+            description = "Get list of transaction considering page index and size")
+    @GetMapping("transactions")
+    public Page<WalletTransaction> getTransactions(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "true") boolean descending) {
+        return service.getTransactionHistory(getCurrentUsername(), page, size, descending);
     }
 
     private String getCurrentUsername() {

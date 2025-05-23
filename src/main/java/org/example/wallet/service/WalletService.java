@@ -10,6 +10,9 @@ import org.example.wallet.model.WalletTransaction;
 import org.example.wallet.repository.AuditLogRepository;
 import org.example.wallet.repository.WalletRepository;
 import org.example.wallet.repository.WalletTransactionRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -93,6 +96,13 @@ public class WalletService {
 
     public List<WalletTransaction> getTransactionHistory(String owner) {
         return transactionRepository.findByOwner(owner);
+    }
+
+    public Page<WalletTransaction> getTransactionHistory(String owner, int page, int size, boolean descending) {
+        Sort sort = descending ?
+                Sort.by("timestamp").descending() : Sort.by("timestamp").ascending();
+        PageRequest pageable = PageRequest.of(page, size, sort);
+        return transactionRepository.findByOwner(owner, pageable);
     }
 
     @Transactional(propagation = Propagation.NESTED)
