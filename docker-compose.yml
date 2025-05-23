@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: wallet-mysql
+    environment:
+      MYSQL_DATABASE: wallet
+      MYSQL_ROOT_PASSWORD: asdf/1234
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: 3S!amShahr
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - wallet-net
+
+  app:
+    image: wallet-app:latest
+    container_name: wallet-app
+    build:
+      context: .
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://wallet-mysql:3306/wallet?useSSL=false&createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: 3S!amShahr
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    depends_on:
+      - mysql
+    networks:
+      - wallet-net
+
+volumes:
+  mysql_data:
+
+networks:
+  wallet-net:

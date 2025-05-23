@@ -13,8 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
-@SpringBootApplication
-@EnableJpaRepositories(basePackages = "org.example.wallet.repository")
+@SpringBootApplication(scanBasePackageClasses = WalletApplication.class)
 @EnableConfigurationProperties
 @EnableScheduling
 public class WalletApplication {
