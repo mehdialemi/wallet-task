@@ -2,8 +2,8 @@ package org.example.wallet.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.wallet.model.AppUser;
-import org.example.wallet.payload.LoginUserRequest;
-import org.example.wallet.payload.RegisterUserRequest;
+import org.example.wallet.dto.LoginUserRequest;
+import org.example.wallet.dto.RegisterUserRequest;
 import org.example.wallet.repository.AppUserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

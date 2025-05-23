@@ -2,14 +2,13 @@ package org.example.wallet.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.wallet.model.AppUser;
-import org.example.wallet.payload.LoginResponse;
-import org.example.wallet.payload.LoginUserRequest;
-import org.example.wallet.payload.RegisterUserRequest;
+import org.example.wallet.dto.LoginResponse;
+import org.example.wallet.dto.LoginUserRequest;
+import org.example.wallet.dto.RegisterUserRequest;
 import org.example.wallet.service.AuthenticationService;
 import org.example.wallet.service.JwtService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController

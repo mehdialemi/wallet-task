@@ -2,6 +2,7 @@ package org.example.wallet;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,12 +14,11 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @SpringBootApplication
 @EnableJpaRepositories(basePackages = "org.example.wallet.repository")
+@EnableConfigurationProperties
 public class WalletApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(WalletApplication.class, args);
     }
-
-
 
 }

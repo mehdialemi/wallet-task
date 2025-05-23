@@ -2,11 +2,10 @@ package org.example.wallet.controller;
 
 import org.example.wallet.exception.InsufficientBalanceException;
 import org.example.wallet.exception.WalletNotFoundException;
+import org.example.wallet.model.Wallet;
 import org.example.wallet.model.WalletTransaction;
-import org.example.wallet.payload.TransferRequest;
 import org.example.wallet.service.WalletService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,11 +21,10 @@ public class WalletController {
     @Autowired
     private WalletService service;
 
-    private String getCurrentUsername() {
-        Authentication authentication = SecurityContextHolder
-                .getContext()
-                .getAuthentication();
-        return authentication.getName();
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/create")
+    public Wallet createWallet() {
+        return service.createWallet(getCurrentUsername());
     }
 
     @PreAuthorize("hasRole('USER')")
@@ -47,5 +45,12 @@ public class WalletController {
     @GetMapping("/history")
     public List<WalletTransaction> transactionHistory() {
         return service.getTransactionHistory(getCurrentUsername());
+    }
+
+    private String getCurrentUsername() {
+        Authentication authentication = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+        return authentication.getName();
     }
 }

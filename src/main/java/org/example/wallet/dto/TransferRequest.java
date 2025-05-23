@@ -1,4 +1,4 @@
-package org.example.wallet.payload;
+package org.example.wallet.dto;
 
 
 public class TransferRequest {
