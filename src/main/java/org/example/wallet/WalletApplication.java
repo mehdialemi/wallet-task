@@ -19,21 +19,6 @@ public class WalletApplication {
         SpringApplication.run(WalletApplication.class, args);
     }
 
-//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//        http
-//                .csrf(csrf -> csrf.disable())
-//                .authorizeHttpRequests((authz -> authz.requestMatchers("/login",
-//                                "/logout",
-//                                "/register",
-//                                "/v3/api-docs/**",
-//                                "/swagger-ui.html"
-//                                , "/swagger-ui/**")
-//                        .permitAll()
-//                        .anyRequest()
-//                        .authenticated()
-//                )).formLogin(form -> form.defaultSuccessUrl("/wallet/balance", true))
-//                .logout(logout -> logout.permitAll());
-//        return http.build();
-//    }
+
 
 }
