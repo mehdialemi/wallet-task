@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -101,8 +102,16 @@ public class WalletService {
     public Page<WalletTransaction> getTransactionHistory(String owner, int page, int size, boolean descending) {
         Sort sort = descending ?
                 Sort.by("timestamp").descending() : Sort.by("timestamp").ascending();
-        PageRequest pageable = PageRequest.of(page, size, sort);
-        return transactionRepository.findByOwner(owner, pageable);
+        PageRequest pageRequest = PageRequest.of(page, size, sort);
+        return transactionRepository.findByOwner(owner, pageRequest);
+    }
+
+    public Page<WalletTransaction> getTransactionHistory(String owner, int page, int size, boolean descending,
+                                                         LocalDateTime from, LocalDateTime to) {
+        Sort sort = descending ?
+                Sort.by("timestamp").descending() : Sort.by("timestamp").ascending();
+        PageRequest pageRequest = PageRequest.of(page, size, sort);
+        return transactionRepository.findByOwnerAndTimestampBetween(owner, from, to, pageRequest);
     }
 
     @Transactional(propagation = Propagation.NESTED)

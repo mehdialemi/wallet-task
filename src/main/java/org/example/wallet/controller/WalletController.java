@@ -18,6 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -82,7 +83,14 @@ public class WalletController {
     public Page<WalletTransaction> getTransactions(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "true") boolean descending) {
+            @RequestParam(defaultValue = "true") boolean descending,
+            @RequestParam(required = false) String from,
+            @RequestParam(required = false) String to) {
+        if (from != null && to != null) {
+            LocalDateTime fromDateTime = LocalDateTime.parse(from);
+            LocalDateTime toDateTime = LocalDateTime.parse(to);
+            return service.getTransactionHistory(getCurrentUsername(), page, size, descending, fromDateTime, toDateTime);
+        }
         return service.getTransactionHistory(getCurrentUsername(), page, size, descending);
     }
 
