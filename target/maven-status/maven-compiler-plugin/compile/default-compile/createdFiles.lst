@@ -1,5 +1,6 @@
 org/example/wallet/model/AppUser.class
 org/example/wallet/config/SecurityConfig.class
+org/example/wallet/dto/AddFundRequest.class
 org/example/wallet/service/CustomUserDetailsService.class
 org/example/wallet/controller/WalletController.class
 org/example/wallet/dto/LoginResponse.class

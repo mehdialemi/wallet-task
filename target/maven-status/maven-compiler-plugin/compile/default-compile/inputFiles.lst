@@ -5,6 +5,7 @@
 /home/mehdi/IdeaProjects/demo/src/main/java/org/example/wallet/config/SwaggerConfig.java
 /home/mehdi/IdeaProjects/demo/src/main/java/org/example/wallet/controller/AuthController.java
 /home/mehdi/IdeaProjects/demo/src/main/java/org/example/wallet/controller/WalletController.java
+/home/mehdi/IdeaProjects/demo/src/main/java/org/example/wallet/dto/AddFundRequest.java
 /home/mehdi/IdeaProjects/demo/src/main/java/org/example/wallet/dto/LoginResponse.java
 /home/mehdi/IdeaProjects/demo/src/main/java/org/example/wallet/dto/LoginUserRequest.java
 /home/mehdi/IdeaProjects/demo/src/main/java/org/example/wallet/dto/RegisterUserRequest.java
