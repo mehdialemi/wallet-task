@@ -14,6 +14,8 @@ http://localhost:8080/swagger-ui.html
 
 ## docker
 to immediately start an instance of program go to the root directory of the project and run the following command.
+```
 mvn clean package
 docker compose up --build
+```
 
