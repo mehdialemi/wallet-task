@@ -1,6 +1,7 @@
 package org.example.wallet.exception;
 
 import io.jsonwebtoken.ExpiredJwtException;
+import org.apache.coyote.BadRequestException;
 import org.example.wallet.dto.WithdrawFundRequest;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
@@ -57,6 +58,9 @@ public class GlobalExceptionHandler {
         } else if (exception instanceof ExpiredJwtException) {
             errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(403), exception.getMessage());
             errorDetail.setProperty("description", "The JWT token has expired");
+        } else if (exception instanceof BadRequestException) {
+            errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(400), exception.getMessage());
+            errorDetail.setProperty("description", "Bad request!!1");
         } else {
             errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500), exception.getMessage());
             errorDetail.setProperty("description", "Unknown error");

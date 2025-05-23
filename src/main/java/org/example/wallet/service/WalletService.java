@@ -3,16 +3,20 @@ package org.example.wallet.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.wallet.exception.InsufficientBalanceException;
+import org.example.wallet.exception.WalletException;
 import org.example.wallet.exception.WalletNotFoundException;
 import org.example.wallet.model.AuditLog;
+import org.example.wallet.model.ScheduledTransaction;
 import org.example.wallet.model.Wallet;
 import org.example.wallet.model.WalletTransaction;
 import org.example.wallet.repository.AuditLogRepository;
+import org.example.wallet.repository.ScheduledTransactionRepository;
 import org.example.wallet.repository.WalletRepository;
 import org.example.wallet.repository.WalletTransactionRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -28,10 +32,9 @@ import java.util.List;
 public class WalletService {
 
     private final WalletRepository walletRepository;
-
     private final WalletTransactionRepository transactionRepository;
-
     private final AuditLogRepository auditLogRepository;
+    private final ScheduledTransactionRepository scheduledTransactionRepository;
 
     public Wallet getWallet(String owner) throws WalletNotFoundException {
         return walletRepository.findByOwner(owner).orElseThrow(
@@ -112,6 +115,39 @@ public class WalletService {
                 Sort.by("timestamp").descending() : Sort.by("timestamp").ascending();
         PageRequest pageRequest = PageRequest.of(page, size, sort);
         return transactionRepository.findByOwnerAndTimestampBetween(owner, from, to, pageRequest);
+    }
+
+    public void scheduleTransaction(String owner, String targetOwner, BigDecimal amount, String type,
+                                    LocalDateTime scheduledTime) {
+        ScheduledTransaction scheduledTransaction = new ScheduledTransaction(owner, targetOwner, amount, type, scheduledTime);
+        scheduledTransactionRepository.save(scheduledTransaction);
+    }
+
+    @Scheduled(fixedRate = 60000)
+    public void processScheduledTransactions() {
+        List<ScheduledTransaction> dueTxs =
+                scheduledTransactionRepository.findByExecutedFalseAndScheduledTimeBefore(LocalDateTime.now());
+        for (ScheduledTransaction tx : dueTxs) {
+            try {
+                switch (tx.getType()) {
+                    case "ADD":
+                        deposit(tx.getOwner(), tx.getAmount());
+                        break;
+                    case "WITHDRAW":
+                        withdrawFunds(tx.getOwner(), tx.getAmount());
+                        break;
+                    case "TRANSFER":
+                        transfer(tx.getOwner(), tx.getTargetOwner(), tx.getAmount());
+                        break;
+
+                    default:
+                        log.error("Unknown transaction type: {}", tx.getType());
+                        continue;
+                }
+            } catch (WalletException exception) {
+                log.error("Scheduled transaction failed for {}: {}", tx.getOwner(), exception.getMessage());
+            }
+        }
     }
 
     @Transactional(propagation = Propagation.NESTED)

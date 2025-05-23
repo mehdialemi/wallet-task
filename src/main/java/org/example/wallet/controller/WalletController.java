@@ -1,9 +1,12 @@
 package org.example.wallet.controller;
 
+import ch.qos.logback.core.util.StringUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.example.wallet.dto.AddFundRequest;
+import org.example.wallet.dto.ScheduleRequest;
 import org.example.wallet.dto.TransferRequest;
 import org.example.wallet.dto.WithdrawFundRequest;
 import org.example.wallet.exception.InsufficientBalanceException;
@@ -92,6 +95,20 @@ public class WalletController {
             return service.getTransactionHistory(getCurrentUsername(), page, size, descending, fromDateTime, toDateTime);
         }
         return service.getTransactionHistory(getCurrentUsername(), page, size, descending);
+    }
+
+    @Operation(summary = "Schedule wallet operation",
+            description = "Schedule deposit, withdraw, and transfer operation in designated datetime")
+    @PreAuthorize("hasRole('USER')")
+    @PostMapping("schedule")
+    public String scheduleTransaction(@RequestBody ScheduleRequest request) throws BadRequestException {
+        if (!StringUtil.isNullOrEmpty(request.getScheduledTime())) {
+            LocalDateTime localDateTime = LocalDateTime.parse(request.getScheduledTime());
+            service.scheduleTransaction(getCurrentUsername(),
+                    request.getTargetOwner(), request.getAmount(), request.getType(), localDateTime);
+            return "Scheduled successfully";
+        }
+        throw new BadRequestException("invalid request for scheduled transaction");
     }
 
     private String getCurrentUsername() {
