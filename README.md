@@ -1,5 +1,5 @@
 # simple wallet
-This is a wallet app to manage user balance, transaction, history and etc.
+This is a wallet app to manage user balance, transaction, history, and scheduled transaction.
 
 ## design choice
 - There is one wallet service which accepts wallet api REST requests including create, deposit, withdraw, history of an already created user.
